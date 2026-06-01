@@ -1093,10 +1093,6 @@ protected:
     }
 
     void mousePressEvent(QMouseEvent *e) override {
-        if (e->button() == Qt::RightButton) {
-            showContextMenu(e->globalPosition().toPoint());
-            return;
-        }
         if (e->button() == Qt::LeftButton) {
             showLastResponse();
             return;
@@ -1110,6 +1106,39 @@ protected:
 private:
     QPoint panelAnchor(int dx = -6, int dy = 26) {
         return mapToGlobal(QPoint(width() - dx, dy));
+    }
+
+    QPoint smartPanelPos(QWidget *w, int preferredYOffset = 0) {
+        QPoint pos = mapToGlobal(QPoint(width() + 6, preferredYOffset));
+
+        if (auto *screen = QGuiApplication::screenAt(mapToGlobal(rect().center()))) {
+            QRect sg = screen->availableGeometry();
+            QString configured = positionSetting();
+            int margin = 12;
+
+            // If the jewel is anchored near the bottom, open panels upward from it
+            // instead of letting them hang into the damaged/taskbar area.
+            if (configured.startsWith("bottom")) {
+                pos.setY(mapToGlobal(QPoint(0, height())).y() - w->height() - 8);
+            } else {
+                pos.setY(mapToGlobal(QPoint(0, 0)).y() + height() + 8);
+            }
+
+            if (configured.contains("right")) {
+                pos.setX(mapToGlobal(QPoint(0, 0)).x() - w->width() - 8);
+            } else if (configured.contains("middle")) {
+                pos.setX(mapToGlobal(QPoint(width() / 2, 0)).x() - w->width() / 2);
+            } else {
+                pos.setX(mapToGlobal(QPoint(width(), 0)).x() + 8);
+            }
+
+            if (pos.x() + w->width() > sg.right() - margin) pos.setX(sg.right() - margin - w->width());
+            if (pos.x() < sg.left() + margin) pos.setX(sg.left() + margin);
+            if (pos.y() + w->height() > sg.bottom() - margin) pos.setY(sg.bottom() - margin - w->height());
+            if (pos.y() < sg.top() + margin) pos.setY(sg.top() + margin);
+        }
+
+        return pos;
     }
 
     void wirePanel(NeonCommandPanel *p) {
@@ -1138,16 +1167,16 @@ private:
 
     void openInput() {
         auto *p = ensurePanel();
-        p->move(panelAnchor());
         p->showInput();
+        p->move(smartPanelPos(p));
     }
 
     void showLastResponse() {
         unread = false;
         update();
         auto *p = ensurePanel();
-        p->move(panelAnchor());
         p->showLastResponse();
+        p->move(smartPanelPos(p));
     }
 
     void showHistory() {
@@ -1166,15 +1195,14 @@ private:
                 unread = false;
                 update();
                 auto *p = ensurePanel();
-                p->move(panelAnchor());
                 p->showEntry(e);
+                p->move(smartPanelPos(p));
                 if (historyPanel) historyPanel->hide();
             };
         }
         historyPanel->refresh();
-        QPoint pos = panelAnchor(-6, -280);
-        historyPanel->move(pos);
         historyPanel->show();
+        historyPanel->move(smartPanelPos(historyPanel));
         historyPanel->raise();
         historyPanel->activateWindow();
     }
@@ -1193,13 +1221,13 @@ private:
             settingsPanel->onSaved = [this]() {
                 applyConfiguredPosition();
                 if (panel) {
-                    panel->move(panelAnchor());
                     panel->showInput();
+                    panel->move(smartPanelPos(panel));
                 }
             };
         }
-        settingsPanel->move(panelAnchor(-6, 52));
         settingsPanel->show();
+        settingsPanel->move(smartPanelPos(settingsPanel));
         settingsPanel->raise();
         settingsPanel->activateWindow();
     }
