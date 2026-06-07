@@ -1,0 +1,57 @@
+#pragma once
+#include <atomic>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdio>
+#include <functional>
+#include <optional>
+#include <random>
+#include <vector>
+
+#include <QApplication>
+#include <QClipboard>
+#include <QColor>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QDateTime>
+#include <QDir>
+#include <QEnterEvent>
+#include <QEventLoop>
+#include <QFile>
+#include <QFont>
+#include <QGraphicsDropShadowEffect>
+#include <QGuiApplication>
+#include <QHBoxLayout>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QRandomGenerator>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPixmap>
+#include <QProcessEnvironment>
+#include <QPushButton>
+#include <QScreen>
+#include <QSettings>
+#include <QSpinBox>
+#include <QStandardPaths>
+#include <QTextBrowser>
+#include <QTimer>
+#include <QUrl>
+#include <QUrlQuery>
+#include <QVBoxLayout>
+#include <QWidget>
+
+
+static constexpr double PI = 3.14159265358979323846;
