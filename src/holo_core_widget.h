@@ -48,7 +48,7 @@ public:
         setAttribute(Qt::WA_TranslucentBackground);
         setAttribute(Qt::WA_ShowWithoutActivating);
         setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool | Qt::X11BypassWindowManagerHint);
-        setFixedSize(130, 130);
+        setFixedSize(340, 130);
         setMouseTracking(true);
 
         buildGeometry();
@@ -119,7 +119,7 @@ protected:
         p.setRenderHint(QPainter::Antialiasing, true);
         p.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
-        QPointF c(width() / 2.0, height() / 2.0);
+        QPointF c(65, height() / 2.0);
         double pulse = processing ? 0.5 + 0.5 * std::sin(processingPulse) : 0.0;
         double coreScale = processing ? 1.0 + pulse * 0.08 : 1.0;
 
@@ -536,21 +536,49 @@ private:
     void drawTaskStatus(QPainter &p, QPointF c) {
         if (!showTaskStatusSetting() || taskStatusText.isEmpty()) return;
         QFont f = p.font();
-        f.setPixelSize(10);
+        f.setPixelSize(11);
         f.setWeight(QFont::Medium);
         p.setFont(f);
         QFontMetrics fm(f);
-        QString shown = fm.elidedText(taskStatusText, Qt::ElideRight, 104);
-        QRectF box(c.x() - 54, height() - 24, 108, 16);
+        int boxW = 196;
+        int lineH = 15;
+        int maxLines = 2;
+        int boxH = lineH * maxLines + 8;
+        QStringList lines;
+        QString remaining = taskStatusText;
+        for (int i = 0; i < maxLines && !remaining.isEmpty(); ++i) {
+            int lastFitting = 0;
+            for (int j = 1; j <= remaining.length(); ++j) {
+                if (fm.horizontalAdvance(remaining.left(j)) <= boxW - 14) lastFitting = j;
+                else break;
+            }
+            if (i == maxLines - 1 && lastFitting < remaining.length()) {
+                lines << fm.elidedText(remaining.left(lastFitting), Qt::ElideRight, boxW - 14);
+            } else if (lastFitting >= remaining.length()) {
+                lines << remaining.left(lastFitting);
+                remaining.clear();
+            } else {
+                int breakAt = remaining.lastIndexOf(' ', lastFitting);
+                if (breakAt <= 0) breakAt = lastFitting;
+                lines << remaining.left(breakAt);
+                remaining = remaining.mid(breakAt).trimmed();
+            }
+        }
+        double boxX = 138;
+        double boxY = (height() - boxH) / 2.0;
+        QRectF box(boxX, boxY, boxW, boxH);
         QPainterPath path;
         path.addRoundedRect(box, 7, 7);
         p.setPen(Qt::NoPen);
-        p.setBrush(QColor(5, 9, 22, 178));
+        p.setBrush(QColor(5, 9, 22, 200));
         p.drawPath(path);
         p.setPen(QPen(QColor(0, 240, 255, 120), 1.0));
         p.drawPath(path);
         p.setPen(QColor(220, 255, 255, 210));
-        p.drawText(box.adjusted(5, 0, -5, 0), Qt::AlignVCenter | Qt::AlignLeft, shown);
+        for (int i = 0; i < lines.size(); ++i) {
+            QRectF lineRect(box.x() + 7, box.y() + 4 + i * lineH, boxW - 14, lineH);
+            p.drawText(lineRect, Qt::AlignVCenter | Qt::AlignLeft, lines[i]);
+        }
     }
 
     void drawUnreadBadge(QPainter &p, QPointF c) {

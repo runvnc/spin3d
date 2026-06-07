@@ -330,6 +330,23 @@ private:
         return agent.isEmpty() ? "Assistant" : agent;
     }
 
+    QString paramValuesPreview(const QJsonObject &obj) {
+        QJsonObject params = obj.contains("args") ? obj["args"].toObject() : obj["params"].toObject();
+        if (params.isEmpty()) return QString();
+        QString preview;
+        for (auto it = params.begin(); it != params.end(); ++it) {
+            QString val;
+            if (it.value().isString()) val = it.value().toString();
+            else if (it.value().isBool()) val = it.value().toBool() ? "true" : "false";
+            else if (it.value().isDouble()) val = QString::number(it.value().toDouble());
+            else val = QString::fromUtf8(QJsonDocument(it.value().toObject()).toJson(QJsonDocument::Compact).left(60));
+            if (!preview.isEmpty()) preview += " ";
+            preview += val;
+            if (preview.length() > 40) { preview = preview.left(40) + "…"; break; }
+        }
+        return preview;
+    }
+
     void setTaskStatus(const QString &text) {
         currentStatusText = text;
         if (showTaskStatusSetting() && onTaskStatus) onTaskStatus(text);
@@ -353,10 +370,12 @@ private:
         QJsonObject obj = doc.object();
         if (event == "running_command") {
             QString cmd = obj["command"].toString();
-            if (!cmd.isEmpty()) setTaskStatus("> " + cmd);
+            QString pv = paramValuesPreview(obj);
+            if (!cmd.isEmpty()) setTaskStatus("> " + cmd + (pv.isEmpty() ? "" : ": " + pv));
         } else if (event == "partial_command") {
             QString cmd = obj["command"].toString();
-            if (!cmd.isEmpty() && currentStatusText.isEmpty()) setTaskStatus("> " + cmd);
+            QString pv = paramValuesPreview(obj);
+            if (!cmd.isEmpty() && currentStatusText.isEmpty()) setTaskStatus("> " + cmd + (pv.isEmpty() ? "" : ": " + pv));
         } else if (event == "finished_chat") {
             setTaskStatus("");
         } else if (event == "system_error") {

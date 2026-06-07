@@ -20,11 +20,11 @@ public:
     SettingsPanel(QWidget *parent = nullptr) : QWidget(parent) {
         setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
         setAttribute(Qt::WA_TranslucentBackground);
-        setFixedSize(450, 470);
+        setFixedSize(450, 490);
 
         auto *layout = new QVBoxLayout(this);
         layout->setContentsMargins(24, 22, 24, 22);
-        layout->setSpacing(12);
+        layout->setSpacing(14);
 
         auto *title = new QLabel("Settings", this);
         title->setStyleSheet("QLabel { color: #E9FFFF; font-size: 20px; font-weight: 600; }");
@@ -37,9 +37,10 @@ public:
         agentEdit = new QLineEdit(this);
         agentEdit->setText(agentNameSetting());
         agentEdit->setPlaceholderText("Assistant");
+        agentEdit->setMinimumHeight(36);
         agentEdit->setStyleSheet(
             "QLineEdit { background: rgba(7,12,28,220); color: #E9FFFF; border: 1px solid rgba(64,240,255,150);"
-            "border-radius: 14px; padding: 10px 14px; font-size: 16px; }"
+            "border-radius: 14px; padding: 6px 14px; font-size: 16px; }"
             "QLineEdit:focus { border: 1px solid rgba(255,166,48,185); }"
         );
         layout->addWidget(agentEdit);
@@ -53,6 +54,7 @@ public:
         layout->addWidget(posLabel);
 
         positionCombo = new QComboBox(this);
+        positionCombo->setMinimumHeight(32);
         positionCombo->addItem("Bottom left", "bottom-left");
         positionCombo->addItem("Bottom middle", "bottom-middle");
         positionCombo->addItem("Bottom right", "bottom-right");
@@ -63,7 +65,7 @@ public:
         if (posIndex >= 0) positionCombo->setCurrentIndex(posIndex);
         positionCombo->setStyleSheet(
             "QComboBox { background: rgba(7,12,28,220); color: #E9FFFF; border: 1px solid rgba(64,240,255,150);"
-            "border-radius: 12px; padding: 7px 10px; font-size: 14px; }"
+            "border-radius: 12px; padding: 4px 10px; font-size: 14px; }"
             "QComboBox::drop-down { border: none; width: 24px; }"
             "QComboBox QAbstractItemView { background: rgba(5,9,22,245); color: #E9FFFF; selection-background-color: rgba(255,166,48,60); }"
         );
@@ -76,13 +78,15 @@ public:
         auto *offsetRow = new QHBoxLayout();
         offsetXSpin = new QSpinBox(this);
         offsetYSpin = new QSpinBox(this);
+        offsetXSpin->setMinimumHeight(32);
+        offsetYSpin->setMinimumHeight(32);
         offsetXSpin->setRange(-1000, 1000);
         offsetYSpin->setRange(-1000, 1000);
         offsetXSpin->setValue(offsetXSetting());
         offsetYSpin->setValue(offsetYSetting());
         offsetXSpin->setPrefix("X ");
         offsetYSpin->setPrefix("Y ");
-        QString spinStyle = "QSpinBox { background: rgba(7,12,28,220); color: #E9FFFF; border: 1px solid rgba(64,240,255,140); border-radius: 12px; padding: 7px 8px; font-size: 14px; }";
+        QString spinStyle = "QSpinBox { background: rgba(7,12,28,220); color: #E9FFFF; border: 1px solid rgba(64,240,255,140); border-radius: 12px; padding: 4px 8px; font-size: 14px; }";
         offsetXSpin->setStyleSheet(spinStyle);
         offsetYSpin->setStyleSheet(spinStyle);
         offsetRow->addWidget(offsetXSpin);
@@ -94,6 +98,7 @@ public:
         layout->addWidget(timeoutLabel);
 
         timeoutSpin = new QSpinBox(this);
+        timeoutSpin->setMinimumHeight(32);
         timeoutSpin->setRange(30, 3600);
         timeoutSpin->setValue(timeoutSetting() / 1000);
         timeoutSpin->setSuffix(" s");
